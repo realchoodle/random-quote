@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#
+# Pick a random line of text only using builtins.
+
+random_number=$RANDOM
+quotes_file="${1:-"./quotes.txt"}"
+
+# Usage: format <format> <text>. Can be nested.
+format() {
+    local style text
+    style="$1"
+    text="$2"
+    case "$style" in
+        "reset"|"re") printf "\e[0m%s\e[0m" "$text"; return 0;;
+        "bold"|"bo") printf "\e[1m%s\e[0m" "$text"; return 0;;
+        "dim"|"di") printf "\e[2m%s\e[0m" "$text"; return 0;;
+        "italic"|"it") printf "\e[3m%s\e[0m" "$text"; return 0;;
+        "underline"|"un") printf "\e[4m%s\e[0m" "$text"; return 0;;
+        *) printf "format(): Invalid format!" >&2; return 1
+    esac
+}
+
+# The wc program is not a builtin.
+line_count() {
+    local count=0
+    while IFS=$'\n' read -r _; do
+        ((count++))
+    done < "$1"
+    printf "$count"
+    return 0
+}
+
+quote_count=$(( $(line_count "$quotes_file") ))
+random_quote_line=$(( ((random_number % quote_count)) + 1 ))
+
+pull_quote() {
+    local quote_line=0
+    while IFS=$'\n' read -r full_block; do
+        ((quote_line++))
+        if [[ "$quote_line" == "$random_quote_line" ]]; then
+            while IFS='_' read -r quote author work; do
+                printf "%s\n" "$(format bo "$(format it "$quote")")"
+                printf "— %s " "$(format re "$author")"
+                printf "%s\n" "$(format di "$(format it "$work")")"
+            done <<< "$full_block" # here-string treats $full_block as a file
+        fi
+    done < "$quotes_file"
+    return 0
+}
+
+pull_quote
