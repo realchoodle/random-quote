@@ -3,7 +3,7 @@
 # Pick a random line of text only using builtins.
 
 random_number=$RANDOM
-quotes_file="${1:-"./quotes.txt"}"
+quotes_file="${1:-"$HOME/Documents/quotes.txt"}"
 
 # Usage: format <format> <text>. Can be nested.
 format() {
@@ -39,9 +39,9 @@ pull_quote() {
         ((quote_line++))
         if [[ "$quote_line" == "$random_quote_line" ]]; then
             while IFS='_' read -r quote author work; do
-                printf "%s\n" "$(format bo "$(format it "$quote")")"
-                printf "— %s " "$(format re "$author")"
-                printf "%s\n" "$(format di "$(format it "$work")")"
+                printf "%s\n" "$(format it "$quote")"
+                printf "\t— %s" "$(format re "$author")"
+                printf "%s\n" "$(format di ", $(format it "$work")")"
             done <<< "$full_block" # here-string treats $full_block as a file
         fi
     done < "$quotes_file"
