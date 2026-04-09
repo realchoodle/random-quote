@@ -4,6 +4,7 @@
 
 ## To-Do
 
-- [ ] Add function to wrap text based on `$COLUMNS`
+- [ ] Add function to wrap text dynamically based on `$COLUMNS`
+- [ ] Figure out way to justify the quote attribution to the right
 - [ ] Add a fourth citation or date field
 - [ ] Make the script easier to interact with on the cli
