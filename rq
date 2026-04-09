@@ -73,9 +73,9 @@ pull_quote() {
                 wrapped_author=$(wrap_text "$wrap_width" "$author")
                 wrapped_work=$(wrap_text "$wrap_width" "$work")
 
-                printf "%s\n" "$(format bo "$(format it "$wrapped_quote")")"
-                printf "— %s " "$(format re "$wrapped_author")"
-                printf "%s\n" "$(format di "$(format it "$wrapped_work")")"
+                printf "%s\n" "$(format it "$wrapped_quote")"
+                printf "— %s" "$(format re "$wrapped_author")"
+                printf "%s\n" "$(format di ", $(format it "$wrapped_work")")"
             done <<< "$full_block"
         fi
     done < "$quotes_file"
