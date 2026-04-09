@@ -6,7 +6,7 @@ random_number=$RANDOM
 quotes_file="${1:-"$HOME/Documents/quotes.txt"}"
 wrap_width="${2:-80}"
 
-# Usage: format <format> <text>. Can be nested.
+# Can be nested.
 format() {
     local style text
     style="$1"
