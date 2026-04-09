@@ -3,7 +3,8 @@
 # Pick a random line of text only using builtins.
 
 random_number=$RANDOM
-quotes_file="${1:-"$HOME/Documents/quotes.txt"}"
+quotes_file="${1:-"./quotes.txt"}"
+wrap_width="${2:-80}"
 
 # Usage: format <format> <text>. Can be nested.
 format() {
@@ -15,7 +16,7 @@ format() {
         "bold"|"bo") printf "\e[1m%s\e[0m" "$text"; return 0;;
         "dim"|"di") printf "\e[2m%s\e[0m" "$text"; return 0;;
         "italic"|"it") printf "\e[3m%s\e[0m" "$text"; return 0;;
-        "underline"|"un") printf "\e[4m%s\e[0m" "$text"; return 0;;
+        "underline"|"un") printf "\exe[4m%s\e[0m" "$text"; return 0;;
         *) printf "format(): Invalid format!" >&2; return 1
     esac
 }
@@ -26,12 +27,40 @@ line_count() {
     while IFS=$'\n' read -r _; do
         ((count++))
     done < "$1"
-    printf "$count"
+    printf "%s" "$count"
     return 0
 }
 
+wrap_text() {
+    local width text line current_len
+    width=$1
+    text=$2
+    line=""
+    current_len=0
+
+    read -ra words <<< "$text" # -a assigns words to array.
+
+    for word in "${words[@]}"; do
+        local word_len=${#word}
+            if (( (current_len + word_len + 1 > width) && (current_len > 0) )); then
+            printf "%s\n" "$line"
+            line="$word"
+            current_len=$word_len
+        else
+            if [[ -z "$line" ]]; then # -z to test if string is empty.
+                line="$word"
+                current_len=$word_len
+            else
+                line="$line $word"
+                ((current_len += word_len + 1))
+            fi
+        fi
+    done
+    printf "%s\n" "$line"
+}
+
 quote_count=$(( $(line_count "$quotes_file") ))
-random_quote_line=$(( ((random_number % quote_count)) + 1 ))
+random_quote_line=$(( (random_number % quote_count) + 1 ))
 
 pull_quote() {
     local quote_line=0
@@ -39,10 +68,15 @@ pull_quote() {
         ((quote_line++))
         if [[ "$quote_line" == "$random_quote_line" ]]; then
             while IFS='_' read -r quote author work; do
-                printf "%s\n" "$(format it "$quote")"
-                printf "\t— %s" "$(format re "$author")"
-                printf "%s\n" "$(format di ", $(format it "$work")")"
-            done <<< "$full_block" # here-string treats $full_block as a file
+                local wrapped_quote wrapped_author wrapped_work
+                wrapped_quote=$(wrap_text "$wrap_width" "$quote")
+                wrapped_author=$(wrap_text "$wrap_width" "$author")
+                wrapped_work=$(wrap_text "$wrap_width" "$work")
+
+                printf "%s\n" "$(format bo "$(format it "$wrapped_quote")")"
+                printf "— %s " "$(format re "$wrapped_author")"
+                printf "%s\n" "$(format di "$(format it "$wrapped_work")")"
+            done <<< "$full_block"
         fi
     done < "$quotes_file"
     return 0
