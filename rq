@@ -2,6 +2,8 @@
 #
 # Pick a random line of text only using builtins.
 
+PATH="" # only builtins!!!
+
 random_number=$RANDOM
 quotes_file="${1:-"$HOME/Documents/quotes.txt"}"
 wrap_width="${2:-80}"
