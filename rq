@@ -61,6 +61,8 @@ wrap_text() {
         printf "%s\n" "$line"
 }
 
+# There is a lot of $() here, but ${ ; } would be faster
+
 quote_count=$(( $(line_count "$quotes_file") ))
 random_quote_line=$(( (random_number % quote_count) + 1 ))
 
@@ -71,13 +73,13 @@ show_quote() {
         if [[ "$quote_line" == "$random_quote_line" ]]; then
             while IFS='_' read -r quote author work; do
                 local wrapped_quote wrapped_author wrapped_work
-                wrapped_quote=$(wrap_text "$wrap_width" "$quote")
-                wrapped_author=$(wrap_text "$wrap_width" "$author")
-                wrapped_work=$(wrap_text "$wrap_width" "$work")
+                wrapped_quote=${ wrap_text "$wrap_width" "$quote"; }
+                wrapped_author=${ wrap_text "$wrap_width" "$author"; }
+                wrapped_work=${ wrap_text "$wrap_width" "$work"; }
 
-                printf "%s\n\n" "$(format it "$wrapped_quote")"
-                printf "— %s" "$(format re "$wrapped_author")"
-                printf "%s\n" "$(format di ", $(format it "$wrapped_work")")"
+                printf "%s\n\n" "${ format it "$wrapped_quote"; }"
+                printf "— %s" "${ format re "$wrapped_author"; }"
+                printf "%s\n" "${ format di ", ${ format it "$wrapped_work"; }"; }"
             done <<< "$full_block"
         fi
     done < "$quotes_file"
