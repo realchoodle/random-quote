@@ -61,8 +61,6 @@ wrap_text() {
         printf "%s\n" "$line"
 }
 
-# There is a lot of $() here, but ${ ; } would be faster
-
 quote_count=$(( $(line_count "$quotes_file") ))
 random_quote_line=$(( (random_number % quote_count) + 1 ))
 
